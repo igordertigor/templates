@@ -1,0 +1,1 @@
+intermediate datasets go here. Not quite ready for visualization or model training, but useful to keep in order to avoid cpu and memory load on the final steps. Typical examples are feature sets or training/test/validation splits.
