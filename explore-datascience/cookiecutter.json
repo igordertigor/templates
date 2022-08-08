@@ -1,0 +1,8 @@
+{
+  "repo_name_suffix": "something",
+  "dvc_remote_storage": "",
+  "dvc_remote_name": "remote",
+  "git_init": "yes",
+  "create_venv": "yes",
+  "add_csvmodel": "yes"
+}

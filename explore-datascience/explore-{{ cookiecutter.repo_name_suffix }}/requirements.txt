@@ -1,0 +1,5 @@
+mlem
+{% if cookiecutter.dvc_remote_storage.startswith('gs') %}dvc[gs]{% else %}dvc{% endif %}
+tox
+flake8
+mypy

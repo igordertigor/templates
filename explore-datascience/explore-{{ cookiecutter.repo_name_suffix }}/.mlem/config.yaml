@@ -1,0 +1,5 @@
+{% if cookiecutter.dvc_remote_storage %}
+core:
+  storage:
+    type: dvc
+{% endif %}

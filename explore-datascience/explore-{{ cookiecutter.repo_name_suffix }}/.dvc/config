@@ -1,0 +1,6 @@
+{% if cookiecutter.dvc_remote_storage %}
+[core]
+    remote = {{ cookiecutter.dvc_remote_name }}
+['remote "{{ cookiecutter.dvc_remote_name }}"']
+    url = {{ cookiecutter.dvc_remote_storage }}
+{% endif %}
