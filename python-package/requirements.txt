@@ -1,1 +1,2 @@
 pytest
+{% if cookiecutter.use_pydantic %}pydantic{% endif %}
