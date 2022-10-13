@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -xe
+
 pushd "explore-{{ cookiecutter.repo_name_suffix }}/"
 
 {% if cookiecutter.git_init %}
