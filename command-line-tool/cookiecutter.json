@@ -1,0 +1,9 @@
+{
+  "package_name": "mytool",
+  "author": "me",
+  "author_email": "me@somewhere",
+  "add_publish_task": "yes",
+  "coverage_threshold": "",
+  "use_pydantic": "yes",
+  "commandline_entrypoint": "{{ cookiecutter.package_name }}.cli:app"
+}
