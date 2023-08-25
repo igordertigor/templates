@@ -1,3 +1,4 @@
+from datetime import datetime
 from jinja2 import Template
 
 
@@ -12,3 +13,5 @@ with open('style.css') as f:
 
 with open('index.html', 'w') as f:
     f.write(templ.render(style=style, markdown=markdown))
+
+print(f'{datetime.now().isoformat()} wrote file index.html')
