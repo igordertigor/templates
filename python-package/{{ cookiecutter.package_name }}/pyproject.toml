@@ -17,10 +17,10 @@ build-backend = "setuptools.build_meta"
 {% if cookiecutter.commandline_entrypoint %}
 [project.scripts]
 __post_hook.commandline_entrypoint__
-{$ endif %}
+{% endif %}
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
 local_scheme = "no-local-version"
 tag_regex = "^(?P<prefix>v?)(?P<version>\\d+\\.\\d+\\.\\d+)"
-__post_hook.commandline_entrypoint_
+__post_hook.commandline_entrypoint__
