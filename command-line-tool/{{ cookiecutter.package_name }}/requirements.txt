@@ -1,0 +1,3 @@
+typer
+rich
+{%if cookiecutter.use_pydantic.lower().startswith('y') %}pydantic{% endif %}
