@@ -20,9 +20,3 @@ python -m build
 
 twine check dist/$SOURCEDIST dist/$BINDIST
 twine upload --verbose dist/$SOURCEDIST dist/$BINDIST
-
-echo "****************************************************"
-echo "* Now commit setup.cfg and tag the commit as v${VERSION}"
-echo "****************************************************"
-
-rm $BACKUP_SETUP

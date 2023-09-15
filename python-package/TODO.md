@@ -3,6 +3,7 @@
 - ☑ Update script to typer/rich
 - ☑ Update dependencies
 - ☑ Delete `setup.[cfg,py]`
-- ☐ Documentation?
+- ☑ Documentation?
+- ☐ build process
 
 - ☐ GitHub actions?

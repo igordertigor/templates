@@ -8,5 +8,6 @@
   "coverage_threshold": "",
   "use_pydantic": "yes",
   "commandline_entrypoint": "",
-  "commandline_framework": ["typer/rich", "docopt"]
+  "commandline_framework": ["typer/rich", "docopt"],
+  "increment_version_on_publish": "yes"
 }

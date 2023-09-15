@@ -1,7 +1,7 @@
 [project]
 name = "{{ cookiecutter.package_name }}"
 authors = [
-  {name = "{{ cookiecutter.author }}" email = "{{ cookiecutter.author_email }}"}
+  {name = "{{ cookiecutter.author }}", email = "{{ cookiecutter.author_email }}"}
 ]
 description = "{{ cookiecutter.short_description }}"
 readme = "README.md"
