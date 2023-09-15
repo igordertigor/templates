@@ -1,3 +1,0 @@
-{% if cookiecutter.use_pydantic.lower().startswith("y") %}pydantic{% endif %}
-{% if cookiecutter.commandline_entrypoint %}{% if cookiecutter.commandline_framework == 'docopt' %}docopt{% elif cookiecutter.commandline_framework == 'typer/rich' %}typer
-rich{% endif %}{% endif %}
