@@ -4,6 +4,6 @@
 - ☑ Update dependencies
 - ☑ Delete `setup.[cfg,py]`
 - ☑ Documentation?
-- ☐ build process
+- ☑ build process
 
 - ☐ GitHub actions?
