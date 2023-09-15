@@ -7,5 +7,6 @@
   "add_publish_task": "yes",
   "coverage_threshold": "",
   "use_pydantic": "yes",
-  "commandline_entrypoint": ""
+  "commandline_entrypoint": "",
+  "commandline_framework": ["typer/rich", "docopt"]
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 import os
 import re
 from dataclasses import dataclass, replace
@@ -74,39 +74,108 @@ def convert_filename(filename: str) -> str:
     return filename.replace('/', '.')
 
 
-spec = format_entrypoint(
-    '{{ cookiecutter.commandline_entrypoint }}'
-)
-
-with open(spec.filename, 'w') as f:
-    f.write(
-        '\n'.join(
-            [
-                '#!/usr/bin/env python',
-                '"""',
-                'Usage:',
-                f'    { spec.command } [options]',
-                '',
-                'Options:',
-                '"""',
-                '',
-                'from docopt import docopt',
-                '',
-                f'def { spec.func }():',
-                '    args = docopt(__doc__)',
-            ]
-        )
+def docopt_template(spec: Spec) -> str:
+    return '\n'.join(
+        [
+            '#!/usr/bin/env python',
+            '"""',
+            'Usage:',
+            f'    { spec.command } [options]',
+            '',
+            'Options:',
+            '"""',
+            '',
+            'from docopt import docopt',
+            '',
+            f'def { spec.func }():',
+            '    args = docopt(__doc__)',
+        ]
     )
 
 
-with open('pyproject.toml') as f:
-    txt = f.read()
-
-with open('pyproject.toml', 'w') as f:
-    f.write(
-        re.sub(
-            r'__post_hook.commandline_entrypoint__',
-            spec.qualifier,
-            txt,
-        )
+def typer_template(spec: Spec) -> str:
+    return '\n'.join(
+        [
+            '#!/usr/bin/env python',
+            'import typer',
+            '',
+            'app = typer.Typer()',
+            '',
+            '',
+            '@app.command',
+            f'def {spec.command}():',
+            '    pass',
+            '',
+            '',
+            "if __name__ == '__main__':",
+            '    app()',
+        ]
     )
+
+
+
+
+def add_entrypoint():
+    spec = format_entrypoint('{{ cookiecutter.commandline_entrypoint }}')
+
+    if '{{ cookiecutter.commandline_framework }}' == 'docopt':
+        template = docopt_template(spec)
+    elif '{{ cookiecutter.commandline_framework }}' == 'typer/rich':
+        template = typer_template(spec)
+    else:
+        raise ValueError
+
+    with open(spec.filename, 'w') as f:
+        f.write(template)
+
+    with open('pyproject.toml') as f:
+        txt = f.read()
+
+    txt = re.sub(
+        r'__post_hook.commandline_entrypoint__',
+        spec.qualifier,
+        txt,
+    )
+
+    with open('pyproject.toml', 'w') as f:
+        f.write(txt)
+
+
+
+def calculate_dependencies(include_commandline: bool) -> str:
+    out: List[str] = []
+    if '{{ cookiecutter.use_pydantic }}' == 'yes':
+        out.append('"pydantic"')
+    if include_commandline:
+        if '{{ cookiecutter.commandline_framework }}' == 'docopt':
+            out.append('"docopt"')
+        elif '{{ cookiecutter.commandline_framework }}' == 'typer/rich':
+            out.append('"typer"')
+            out.append('"rich"')
+    if out:
+        return '\n    ' + ',\n    '.join(out) + '\n'
+    else:
+        return ''
+
+
+def add_dependencies():
+    with open('pyproject.toml') as f:
+        txt = f.read()
+
+    include_commandline = bool('{{ cookiecutter.commandline_entrypoint }}')
+
+    txt = re.sub(
+        r'__post_hook.dependencies__',
+        calculate_dependencies(include_commandline),
+        txt,
+    )
+
+    with open('pyproject.toml', 'w') as f:
+        f.write(txt)
+
+
+if __name__ == '__main__':
+    if '{{ cookiecutter.commandline_entrypoint }}':
+        add_entrypoint()
+
+    add_dependencies()
