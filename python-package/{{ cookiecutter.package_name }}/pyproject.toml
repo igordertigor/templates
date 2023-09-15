@@ -1,3 +1,26 @@
+[project]
+name = "{{ cookiecutter.package_name }}"
+authors = [
+  {name = "{{ cookiecutter.author }}" email = "{{ cookiecutter.author_email }}"}
+]
+description = "{{ cookiecutter.short_description }}"
+readme = "README.md"
+license = { text = "{{ cookiecutter.license }}"}
+keywords = []
+dynamic = ["version"]
+dependencies = []
+
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
+
+{% if cookiecutter.commandline_entrypoint %}
+[project.scripts]
+__post_hook.commandline_entrypoint__
+{$ endif %}
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "no-local-version"
+tag_regex = "^(?P<prefix>v?)(?P<version>\\d+\\.\\d+\\.\\d+)"
+__post_hook.commandline_entrypoint_
