@@ -1,0 +1,12 @@
+{
+  "presentation_slug": "presentation",
+  "title": "some presentation",
+  "author": "me",
+  "presentation_date": "2023-08-25",
+  "venue": "",
+  "_copy_without_render": [
+    "resources/deck-packed.js",
+    "resources/light-red-dense.css",
+    "resources/local-fonts"
+  ]
+}
