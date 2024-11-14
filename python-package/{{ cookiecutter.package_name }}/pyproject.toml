@@ -1,3 +1,34 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
+
+[tool.blue]
+
+[project]
+name = {{ cookiecutter.package_name }}
+author = [
+  {name = "{{ cookiecutter.author }}", email = "{{ cookiecutter.author_email }}"},
+]
+readme = "README.md"
+dynamic = ["version", "dependencies"]
+license = {text = "BSD-3-Clause"}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+# Add others here, be also add them to the dynamic spec in project
+
+{% if cookiecutter.commandline_entrypoint %}
+[project.scripts]
+__post_hook.commandline_entrypoint__
+{% endif %}
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "no-local-version"
+tag_regex = "^(?P<prefix>v?)(?P<version>\\d+\\.\\d+\\.\\d+)"
+
+[tool.setuptools.package-data]
+"{{ cookiecutter.package_name }}" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
