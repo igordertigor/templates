@@ -2,8 +2,12 @@
   "package_name": "mypackage",
   "author": "me",
   "author_email": "me@somewhere",
+  "short_description": "",
+  "license": ["BSD-3-Clause", "MIT", "Apache Software License 2.0", "GNU GPL v3.0"],
   "add_publish_task": "yes",
   "coverage_threshold": "",
   "use_pydantic": "yes",
-  "commandline_entrypoint": ""
+  "commandline_entrypoint": "",
+  "commandline_framework": ["typer/rich", "docopt"],
+  "increment_version_on_publish": "yes"
 }

@@ -1,21 +1,21 @@
-[build-system]
-requires = ["setuptools", "setuptools_scm"]
-build-backend = "setuptools.build_meta"
-
-[tool.blue]
-
 [project]
-name = {{ cookiecutter.package_name }}
-author = [
-  {name = "{{ cookiecutter.author }}", email = "{{ cookiecutter.author_email }}"},
+name = "{{ cookiecutter.package_name }}"
+authors = [
+  {name = "{{ cookiecutter.author }}", email = "{{ cookiecutter.author_email }}"}
 ]
+description = "{{ cookiecutter.short_description }}"
 readme = "README.md"
+license = { text = "{{ cookiecutter.license }}"}
+keywords = []
 dynamic = ["version", "dependencies"]
-license = {text = "BSD-3-Clause"}
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 # Add others here, be also add them to the dynamic spec in project
+
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
 
 {% if cookiecutter.commandline_entrypoint %}
 [project.scripts]
@@ -32,3 +32,5 @@ tag_regex = "^(?P<prefix>v?)(?P<version>\\d+\\.\\d+\\.\\d+)"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.blue]
