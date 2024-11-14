@@ -1,2 +1,2 @@
 {% if cookiecutter.use_pydantic.lower().startswith("y") %}pydantic{% endif %}
-{% if cookiecutter.commandline_entrypoint %}docopt{% endif %}
+{% if cookiecutter.commandline_entrypoint %}typer{% endif %}

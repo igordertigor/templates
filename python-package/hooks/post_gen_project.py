@@ -35,17 +35,13 @@ else:
 with open(fname, 'w') as f:
     f.write('\n'.join([
         '#!/usr/bin/env python',
-        '"""',
-        'Usage:',
-        '    {{ cookiecutter.commandline_entrypoint }} [options]',
+        'import typer',
         '',
-        'Options:',
-        '"""',
-        '',
-        'from docopt import docopt',
+        'def main():',
+        '    print("Hello world!")',
         '',
         f'def {entry_func}():',
-        '    args = docopt(__doc__)',
+        '    typer.run(main)',
     ]))
 
 
