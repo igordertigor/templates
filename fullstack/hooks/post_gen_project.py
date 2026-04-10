@@ -58,9 +58,10 @@ def clean_python_files(root: Path) -> None:
 
 
 def rename_dockerfiles(root: Path) -> None:
-    """Rename Dockerfile.txt to Dockerfile after rendering."""
-    for dockerfile_txt in root.rglob("Dockerfile.txt"):
-        target = dockerfile_txt.with_suffix("")
+    """Rename dockerfile.txt to Dockerfile after rendering."""
+    for dockerfile_txt in root.rglob("dockerfile.txt"):
+        # Rename to uppercase Dockerfile (no extension)
+        target = dockerfile_txt.parent / "Dockerfile"
         dockerfile_txt.rename(target)
 
 
