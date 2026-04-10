@@ -13,15 +13,6 @@ from pathlib import Path
 
 ROOT = Path.cwd()
 
-# Debug: Print what files exist before renaming
-print(f"\nDEBUG: ROOT = {ROOT}")
-container_files = list(ROOT.rglob("containerdefinition.txt"))
-print(f"DEBUG: Found {len(container_files)} containerdefinition.txt files")
-for f in container_files:
-    print(f"DEBUG: File: {f}")
-    content = f.read_text()[:200]
-    print(f"DEBUG: Content preview: {content}")
-
 # ── Feature flags ─────────────────────────────────────────────────────────────
 
 ADD_FRONTEND = "{{ cookiecutter.add_frontend }}" == "y"
@@ -66,13 +57,6 @@ def clean_python_files(root: Path) -> None:
         clean_blank_lines(py_file)
 
 
-def rename_dockerfiles(root: Path) -> None:
-    """Rename containerdefinition.txt to Dockerfile after rendering."""
-    for container_def in root.rglob("containerdefinition.txt"):
-        target = container_def.parent / "Dockerfile"
-        container_def.rename(target)
-
-
 # ── Remove disabled features ──────────────────────────────────────────────────
 
 if not ADD_FRONTEND:
@@ -97,10 +81,6 @@ if not USE_STAGE_NAMESPACE:
 
 if not AUTH_DEVICE_FLOW:
     remove("backend/app/auth/device.py")
-
-# ── Rename Dockerfile.txt to Dockerfile ───────────────────────────────────────
-
-rename_dockerfiles(ROOT)
 
 # ── Restore tsconfig.node.json if strawberry was removed but frontend kept ────
 # vite.config.ts still needs it even without codegen.ts
