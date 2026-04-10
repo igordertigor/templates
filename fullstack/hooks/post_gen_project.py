@@ -57,6 +57,13 @@ def clean_python_files(root: Path) -> None:
         clean_blank_lines(py_file)
 
 
+def rename_jinja_files(root: Path) -> None:
+    """Rename .jinja files to remove the extension after rendering."""
+    for jinja_file in root.rglob("*.jinja"):
+        target = jinja_file.with_suffix("")
+        jinja_file.rename(target)
+
+
 # ── Remove disabled features ──────────────────────────────────────────────────
 
 if not ADD_FRONTEND:
@@ -81,6 +88,10 @@ if not USE_STAGE_NAMESPACE:
 
 if not AUTH_DEVICE_FLOW:
     remove("backend/app/auth/device.py")
+
+# ── Rename .jinja files to their final names ──────────────────────────────────
+
+rename_jinja_files(ROOT)
 
 # ── Restore tsconfig.node.json if strawberry was removed but frontend kept ────
 # vite.config.ts still needs it even without codegen.ts

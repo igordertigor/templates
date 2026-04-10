@@ -11,6 +11,5 @@
   "use_stage_namespace": ["y", "n"],
   "auth_user_pkce": ["y", "n"],
   "auth_device_flow": ["y", "n"],
-  "auth_client_credentials": ["n", "y"],
-  "_copy_without_render": []
+  "auth_client_credentials": ["n", "y"]
 }
