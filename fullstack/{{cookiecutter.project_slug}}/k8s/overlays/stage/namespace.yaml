@@ -1,0 +1,6 @@
+{% if cookiecutter.use_stage_namespace == "y" %}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ cookiecutter.project_slug }}-stage
+{% endif %}

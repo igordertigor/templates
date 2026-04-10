@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: {{ cookiecutter.project_slug }}-prod
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - sealed-secrets
+
+patches:
+  - path: patches/backend-config.yaml
+  - path: patches/zitadel-domain.yaml
+
+images:
+  - name: {{ cookiecutter.project_slug }}-backend
+    newTag: latest  # Pin to a specific image digest in production
+  {% if cookiecutter.add_frontend == "y" %}
+  - name: {{ cookiecutter.project_slug }}-frontend
+    newTag: latest
+  {% endif %}

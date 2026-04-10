@@ -1,0 +1,15 @@
+{
+  "project_name": "my-project",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "project_description": "A short description of the project",
+  "python_version": "3.12",
+  "postgres_version": "16",
+  "add_frontend": ["y", "n"],
+  "add_strawberry": ["y", "n"],
+  "add_arq": ["y", "n"],
+  "shared_db": ["y", "n"],
+  "use_stage_namespace": ["y", "n"],
+  "auth_user_pkce": ["y", "n"],
+  "auth_device_flow": ["y", "n"],
+  "auth_client_credentials": ["n", "y"]
+}

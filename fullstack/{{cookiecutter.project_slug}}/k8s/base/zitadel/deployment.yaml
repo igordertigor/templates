@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zitadel
+spec:
+  selector:
+    matchLabels:
+      app: zitadel
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zitadel
+    spec:
+      containers:
+        - name: zitadel
+          image: ghcr.io/zitadel/zitadel:latest
+          args: ["start-from-init", "--tlsMode", "disabled"]
+          env:
+            - name: ZITADEL_MASTERKEY
+              valueFrom:
+                secretKeyRef:
+                  name: zitadel-secret
+                  key: masterkey
+            - name: ZITADEL_DATABASE_POSTGRES_HOST
+              value: postgres
+            - name: ZITADEL_DATABASE_POSTGRES_PORT
+              value: "5432"
+            - name: ZITADEL_DATABASE_POSTGRES_DATABASE
+              value: zitadel
+            - name: ZITADEL_DATABASE_POSTGRES_USER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: username
+            - name: ZITADEL_DATABASE_POSTGRES_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE
+              value: disable
+            - name: ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: username
+            - name: ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE
+              value: disable
+            - name: ZITADEL_EXTERNALSECURE
+              value: "true"
+            - name: ZITADEL_EXTERNALPORT
+              value: "443"
+            # ZITADEL_EXTERNALDOMAIN is patched per overlay
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zitadel
+spec:
+  selector:
+    app: zitadel
+  ports:
+    - port: 8080

@@ -1,0 +1,57 @@
+{% if cookiecutter.add_arq == "y" %}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  selector:
+    matchLabels:
+      app: worker
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: {{ cookiecutter.project_slug }}-backend:latest
+          command: ["uv", "run", "arq", "app.worker.settings.WorkerSettings"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: database-url
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: ZITADEL_DOMAIN
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: zitadel-domain
+            - name: ZITADEL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: zitadel-client-id
+            - name: MINIO_ENDPOINT
+              value: minio:9000
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: secret-key
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+{% endif %}

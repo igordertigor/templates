@@ -1,0 +1,133 @@
+default:
+    just --list
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+
+# Start all backing services
+up:
+    docker compose up -d
+
+# Stop all services
+down:
+    docker compose down
+
+# Stop and remove volumes (destructive)
+clean:
+    docker compose down -v
+{% raw %}
+# View logs
+logs service="":
+    docker compose logs -f {{service}}
+{% endraw %}
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+
+# Install backend dependencies
+install-backend:
+    cd backend && uv sync
+
+# Run dev server with hot reload
+dev-backend:
+    cd backend && uv run fastapi dev app/main.py
+
+# Run tests
+test:
+    cd backend && uv run pytest
+
+# Lint and format check
+lint:
+    cd backend && uv run ruff check .
+    cd backend && uv run ruff format --check .
+
+# Fix lint and format
+fmt:
+    cd backend && uv run ruff check --fix .
+    cd backend && uv run ruff format .
+
+# Apply all migrations
+migrate:
+    cd backend && uv run alembic upgrade head
+
+# Rollback one migration
+migrate-down:
+    cd backend && uv run alembic downgrade -1
+{% raw %}
+# Create a new migration (usage: just migration "add user roles")
+migration name:
+    cd backend && uv run alembic revision --autogenerate -m "{{name}}"
+{% endraw %}
+
+{% if cookiecutter.add_arq == "y" %}
+# Start arq worker
+worker:
+    cd backend && uv run arq app.worker.settings.WorkerSettings
+{% endif %}
+
+# ── Frontend ──────────────────────────────────────────────────────────────────
+{% if cookiecutter.add_frontend == "y" %}
+
+# Install frontend dependencies
+install-frontend:
+    cd frontend && pnpm install
+
+# Run frontend dev server
+dev-frontend:
+    cd frontend && pnpm dev
+
+# Build frontend
+build-frontend:
+    cd frontend && pnpm build
+
+{% if cookiecutter.add_strawberry == "y" %}
+# Regenerate GraphQL types from schema
+codegen:
+    cd frontend && pnpm graphql-codegen
+{% endif %}
+{% endif %}
+
+# ── Combined ──────────────────────────────────────────────────────────────────
+
+# Install all dependencies
+install:
+    just install-backend
+    {% if cookiecutter.add_frontend == "y" %}just install-frontend{% endif %}
+
+# Start full local dev environment
+dev:
+    just up
+    just migrate
+    just dev-backend &
+    {% if cookiecutter.add_frontend == "y" %}just dev-frontend{% endif %}
+
+# ── Kubernetes ────────────────────────────────────────────────────────────────
+
+# Diff prod overlay against cluster
+diff-prod:
+    kubectl diff -k k8s/overlays/prod
+
+# Apply prod overlay manually (prefer Flux for real deployments)
+apply-prod:
+    kubectl apply -k k8s/overlays/prod
+
+{% if cookiecutter.use_stage_namespace == "y" %}
+# Diff stage overlay against cluster
+diff-stage:
+    kubectl diff -k k8s/overlays/stage
+
+# Apply stage overlay manually
+apply-stage:
+    kubectl apply -k k8s/overlays/stage
+
+# Force Flux to reconcile stage immediately
+flux-stage:
+    flux reconcile kustomization apps-stage
+
+{% endif %}
+# Force Flux to reconcile prod immediately
+flux-prod:
+    flux reconcile kustomization apps-prod
+{% raw %}
+# Seal a secret (usage: just seal my-secret.yaml)
+seal file:
+    kubeseal --format yaml < {{file}} > {{file}}.sealed.yaml
+{% endraw %}

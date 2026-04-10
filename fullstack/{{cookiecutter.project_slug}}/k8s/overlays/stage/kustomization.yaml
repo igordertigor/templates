@@ -1,0 +1,23 @@
+{% if cookiecutter.use_stage_namespace == "y" %}
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: {{ cookiecutter.project_slug }}-stage
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - sealed-secrets
+
+patches:
+  - path: patches/backend-config.yaml
+  - path: patches/zitadel-domain.yaml
+
+images:
+  - name: {{ cookiecutter.project_slug }}-backend
+    newTag: latest
+  {% if cookiecutter.add_frontend == "y" %}
+  - name: {{ cookiecutter.project_slug }}-frontend
+    newTag: latest
+  {% endif %}
+{% endif %}

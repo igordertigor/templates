@@ -1,0 +1,9 @@
+{% if cookiecutter.add_frontend == "y" %}
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+{% endif %}

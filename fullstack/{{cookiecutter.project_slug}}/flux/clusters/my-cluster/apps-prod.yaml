@@ -1,0 +1,48 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: {{ cookiecutter.project_slug }}
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/your-org/{{ cookiecutter.project_slug }}  # Update to your repo URL
+  ref:
+    branch: main
+  secretRef:
+    name: {{ cookiecutter.project_slug }}-git-credentials  # Only needed for private repos
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps-prod
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: {{ cookiecutter.project_slug }}
+  targetNamespace: {{ cookiecutter.project_slug }}-prod
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: backend
+      namespace: {{ cookiecutter.project_slug }}-prod
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: zitadel
+      namespace: {{ cookiecutter.project_slug }}-prod
+    {% if cookiecutter.add_arq == "y" %}
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: worker
+      namespace: {{ cookiecutter.project_slug }}-prod
+    {% endif %}
+    {% if cookiecutter.add_frontend == "y" %}
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: frontend
+      namespace: {{ cookiecutter.project_slug }}-prod
+    {% endif %}

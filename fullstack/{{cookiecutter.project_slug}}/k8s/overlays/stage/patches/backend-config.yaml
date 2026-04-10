@@ -1,0 +1,8 @@
+{% if cookiecutter.use_stage_namespace == "y" %}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  zitadel-domain: "https://auth-stage.{{ cookiecutter.project_slug }}.example.com"
+{% endif %}

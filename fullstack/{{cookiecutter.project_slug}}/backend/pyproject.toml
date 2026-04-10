@@ -1,0 +1,40 @@
+[project]
+name = "{{ cookiecutter.project_slug }}-backend"
+version = "0.1.0"
+description = "{{ cookiecutter.project_description }}"
+requires-python = ">={{ cookiecutter.python_version }}"
+dependencies = [
+    "fastapi[standard]>=0.115",
+    "sqlmodel>=0.0.22",
+    "alembic>=1.14",
+    "psycopg[binary]>=3.2",
+    "pydantic-settings>=2.7",
+    "python-jose[cryptography]>=3.3",
+    "httpx>=0.28",
+    {% if cookiecutter.add_strawberry == "y" %}
+    "strawberry-graphql[fastapi]>=0.257",
+    {% endif %}
+    {% if cookiecutter.add_arq == "y" %}
+    "arq>=0.26",
+    "redis>=5.2",
+    {% endif %}
+    "boto3>=1.35",  # MinIO S3-compatible
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.9",
+    "httpx>=0.28",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py{{ cookiecutter.python_version | replace('.', '') }}"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

@@ -1,0 +1,18 @@
+{% if cookiecutter.use_stage_namespace == "y" %}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zitadel
+spec:
+  template:
+    spec:
+      containers:
+        - name: zitadel
+          env:
+            - name: ZITADEL_EXTERNALDOMAIN
+              value: "auth-stage.{{ cookiecutter.project_slug }}.example.com"
+            - name: ZITADEL_EXTERNALPORT
+              value: "443"
+            - name: ZITADEL_EXTERNALSECURE
+              value: "true"
+{% endif %}

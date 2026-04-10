@@ -1,0 +1,37 @@
+{% if cookiecutter.use_stage_namespace == "y" %}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps-stage
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./k8s/overlays/stage
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: {{ cookiecutter.project_slug }}  # Reuses the GitRepository from apps-prod.yaml
+  targetNamespace: {{ cookiecutter.project_slug }}-stage
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: backend
+      namespace: {{ cookiecutter.project_slug }}-stage
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: zitadel
+      namespace: {{ cookiecutter.project_slug }}-stage
+    {% if cookiecutter.add_arq == "y" %}
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: worker
+      namespace: {{ cookiecutter.project_slug }}-stage
+    {% endif %}
+    {% if cookiecutter.add_frontend == "y" %}
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: frontend
+      namespace: {{ cookiecutter.project_slug }}-stage
+    {% endif %}
+{% endif %}

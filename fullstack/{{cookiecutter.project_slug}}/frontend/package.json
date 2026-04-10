@@ -1,0 +1,38 @@
+{% if cookiecutter.add_frontend == "y" %}
+{
+  "name": "{{ cookiecutter.project_slug }}-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src",
+    {% if cookiecutter.add_strawberry == "y" %}
+    "codegen": "graphql-codegen"
+    {% endif %}
+  },
+  "dependencies": {
+    "@apollo/client": "^3.12",
+    "@mantine/core": "^7.16",
+    "@mantine/hooks": "^7.16",
+    "graphql": "^16.10",
+    "oidc-client-ts": "^3.1",
+    "react": "^19.0",
+    "react-dom": "^19.0",
+    "react-router": "^7.4"
+  },
+  "devDependencies": {
+    {% if cookiecutter.add_strawberry == "y" %}
+    "@graphql-codegen/cli": "^5.0",
+    "@graphql-codegen/client-preset": "^4.5",
+    {% endif %}
+    "@types/react": "^19.0",
+    "@types/react-dom": "^19.0",
+    "@vitejs/plugin-react": "^4.3",
+    "typescript": "^5.7",
+    "vite": "^6.2"
+  }
+}
+{% endif %}

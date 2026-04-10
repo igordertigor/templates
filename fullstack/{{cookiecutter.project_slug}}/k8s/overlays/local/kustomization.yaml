@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: {{ cookiecutter.project_slug }}-local
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - secrets.yaml   # Plain secrets for local dev only — never commit real values
+
+patches:
+  - path: patches/backend-config.yaml
+  - path: patches/zitadel-domain.yaml
+  - path: patches/resources.yaml   # Reduce resource requests for local
+
+images:
+  - name: {{ cookiecutter.project_slug }}-backend
+    newTag: local
+  {% if cookiecutter.add_frontend == "y" %}
+  - name: {{ cookiecutter.project_slug }}-frontend
+    newTag: local
+  {% endif %}

@@ -1,0 +1,39 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# uv
+uv.lock
+
+# Node
+node_modules/
+dist/
+*.local
+
+# pnpm
+.pnpm-store/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# macOS
+.DS_Store
+
+# Kubernetes — never commit unsealed secrets
+k8s/overlays/*/secrets.yaml
+!k8s/overlays/local/secrets.yaml  # Local plain secrets are intentionally committed (dev only)
+
+# Sealed secrets are safe to commit (they're encrypted)
+# !k8s/overlays/*/sealed-secrets/*.yaml
