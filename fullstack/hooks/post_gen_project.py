@@ -13,6 +13,15 @@ from pathlib import Path
 
 ROOT = Path.cwd()
 
+# Debug: Print what files exist before renaming
+print(f"\nDEBUG: ROOT = {ROOT}")
+container_files = list(ROOT.rglob("containerdefinition.txt"))
+print(f"DEBUG: Found {len(container_files)} containerdefinition.txt files")
+for f in container_files:
+    print(f"DEBUG: File: {f}")
+    content = f.read_text()[:200]
+    print(f"DEBUG: Content preview: {content}")
+
 # ── Feature flags ─────────────────────────────────────────────────────────────
 
 ADD_FRONTEND = "{{ cookiecutter.add_frontend }}" == "y"
