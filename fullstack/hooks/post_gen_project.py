@@ -58,11 +58,10 @@ def clean_python_files(root: Path) -> None:
 
 
 def rename_dockerfiles(root: Path) -> None:
-    """Rename dockerfile.txt to Dockerfile after rendering."""
-    for dockerfile_txt in root.rglob("dockerfile.txt"):
-        # Rename to uppercase Dockerfile (no extension)
-        target = dockerfile_txt.parent / "Dockerfile"
-        dockerfile_txt.rename(target)
+    """Rename containerdefinition.txt to Dockerfile after rendering."""
+    for container_def in root.rglob("containerdefinition.txt"):
+        target = container_def.parent / "Dockerfile"
+        container_def.rename(target)
 
 
 # ── Remove disabled features ──────────────────────────────────────────────────
