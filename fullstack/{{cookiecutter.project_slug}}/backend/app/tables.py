@@ -7,19 +7,21 @@ import of this module is all that is needed in migrations/env.py.
 """
 
 from datetime import datetime
-from typing import Optional
+import uuid
 
 from sqlmodel import Field, SQLModel
+from .utils.utcnow import utcnow
 
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    sub: str = Field(unique=True, index=True)  # Zitadel subject claim
+    # TODO: Should this be required? Does it need a default_factory
+    id: uuid.UUID | None = Field(default=None, primary_key=True)
+    sub: str = Field(unique=True, index=True)  # Authentik subject claim
     email: str = Field(unique=True, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
 
 
 # Add further table definitions below.
