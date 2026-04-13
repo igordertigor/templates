@@ -3,9 +3,13 @@ default:
 
 # ── Docker ────────────────────────────────────────────────────────────────────
 
-# Start all backing services
+# Start all backing services with watch mode
 up:
-    docker compose up -d
+    docker compose up --watch
+
+# Rebuild containers (needed after dependency changes)
+rebuild:
+    docker compose up --watch --build
 
 # Stop all services
 down:

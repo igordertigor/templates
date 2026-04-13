@@ -148,8 +148,23 @@ services:
       AUTHENTIK_ISSUER: http://authentik-server:9000
       AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
       AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
-    volumes:
-      - ./backend:/app
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app
+        - action: sync
+          path: ./backend/migrations
+          target: /app/migrations
+        - action: sync
+          path: ./backend/alembic.ini
+          target: /app/alembic.ini
+        - action: sync+restart
+          path: ./backend/pyproject.toml
+          target: /app/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
+          target: /app/uv.lock
     ports:
       - "8000:8000"
     depends_on:
@@ -174,8 +189,23 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       AUTHENTIK_ISSUER: http://authentik-server:9000
       AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
-    volumes:
-      - ./backend:/app
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app
+        - action: sync
+          path: ./backend/migrations
+          target: /app/migrations
+        - action: sync
+          path: ./backend/alembic.ini
+          target: /app/alembic.ini
+        - action: sync+restart
+          path: ./backend/pyproject.toml
+          target: /app/pyproject.toml
+        - action: rebuild
+          path: ./backend/uv.lock
+          target: /app/uv.lock
     depends_on:
       postgres:
         condition: service_healthy
@@ -188,9 +218,34 @@ services:
     build:
       context: ./frontend
       target: dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+        - action: sync
+          path: ./frontend/vite.config.ts
+          target: /app/vite.config.ts
+        - action: sync
+          path: ./frontend/tsconfig.json
+          target: /app/tsconfig.json
+        - action: sync
+          path: ./frontend/tsconfig.app.json
+          target: /app/tsconfig.app.json
+        - action: sync
+          path: ./frontend/tsconfig.node.json
+          target: /app/tsconfig.node.json
+        {% if cookiecutter.add_strawberry == "y" %}
+        - action: sync
+          path: ./frontend/codegen.ts
+          target: /app/codegen.ts
+        {% endif %}
+        - action: sync+restart
+          path: ./frontend/package.json
+          target: /app/package.json
+        - action: rebuild
+          path: ./frontend/pnpm-lock.yaml
+          target: /app/pnpm-lock.yaml
     ports:
       - "5173:5173"
     environment:
