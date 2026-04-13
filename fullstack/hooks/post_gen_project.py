@@ -132,5 +132,5 @@ if ADD_FRONTEND:
         "  6. just dev-frontend           # start the frontend (http://localhost:5173)"
     )
 print("")
-print("See README.md for Zitadel setup and Flux bootstrap instructions.")
+print("See README.md for Authentik setup and Flux bootstrap instructions.")
 print("")
