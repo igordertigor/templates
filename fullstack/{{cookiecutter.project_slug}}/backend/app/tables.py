@@ -9,11 +9,12 @@ import of this module is all that is needed in migrations/env.py.
 from datetime import datetime
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlmodel import Field, SQLModel
 from .utils.utcnow import utcnow
 
 
-class User(SQLModel, table=True):
+class User(SQLModel, AsyncAttrs, table=True):
     __tablename__ = "users"
 
     # TODO: Should this be required? Does it need a default_factory
