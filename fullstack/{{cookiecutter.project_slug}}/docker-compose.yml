@@ -19,47 +19,88 @@ services:
       retries: 5
 
   {% if cookiecutter.shared_db == "n" %}
-  postgres-zitadel:
-    image: postgres:{{ cookiecutter.postgres_version }}
+  postgres-authentik:
+    image: postgres:{{ cookiecutter.postgres_version }}-alpine
     environment:
-      POSTGRES_USER: ${ZITADEL_POSTGRES_USER:-zitadel}
-      POSTGRES_PASSWORD: ${ZITADEL_POSTGRES_PASSWORD:?required}
-      POSTGRES_DB: zitadel
+      POSTGRES_USER: ${AUTHENTIK_POSTGRES_USER:-authentik}
+      POSTGRES_PASSWORD: ${AUTHENTIK_POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: authentik
     volumes:
-      - postgres_zitadel_data:/var/lib/postgresql/data
+      - postgres_authentik_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${ZITADEL_POSTGRES_USER:-zitadel}"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${AUTHENTIK_POSTGRES_USER:-authentik}"]
+      interval: 30s
       timeout: 5s
       retries: 5
+      start_period: 20s
+    restart: unless-stopped
   {% endif %}
 
-  zitadel:
-    image: ghcr.io/zitadel/zitadel:latest
-    command: start-from-init --masterkey ${ZITADEL_MASTERKEY:?required} --tlsMode disabled
+  authentik-server:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2026.2.2}
+    restart: unless-stopped
+    command: server
     environment:
-      ZITADEL_DATABASE_POSTGRES_HOST: {% if cookiecutter.shared_db == "y" %}postgres{% else %}postgres-zitadel{% endif %}
-      ZITADEL_DATABASE_POSTGRES_PORT: 5432
-      ZITADEL_DATABASE_POSTGRES_DATABASE: {% if cookiecutter.shared_db == "y" %}zitadel{% else %}zitadel{% endif %}
-      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: {% if cookiecutter.shared_db == "y" %}${POSTGRES_USER:-postgres}{% else %}${ZITADEL_POSTGRES_USER:-zitadel}{% endif %}
-      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: {% if cookiecutter.shared_db == "y" %}${POSTGRES_PASSWORD:?required}{% else %}${ZITADEL_POSTGRES_PASSWORD:?required}{% endif %}
-      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
-      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: {% if cookiecutter.shared_db == "y" %}${POSTGRES_USER:-postgres}{% else %}${ZITADEL_POSTGRES_USER:-zitadel}{% endif %}
-      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: {% if cookiecutter.shared_db == "y" %}${POSTGRES_PASSWORD:?required}{% else %}${ZITADEL_POSTGRES_PASSWORD:?required}{% endif %}
-      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
-      ZITADEL_EXTERNALSECURE: "false"
-      ZITADEL_EXTERNALPORT: 8080
-      ZITADEL_EXTERNALDOMAIN: localhost
+      {% if cookiecutter.shared_db == "y" %}
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER:-postgres}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      {% else %}
+      AUTHENTIK_POSTGRESQL__HOST: postgres-authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_POSTGRES_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_POSTGRES_PASSWORD}
+      {% endif %}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?required}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: ${AUTHENTIK_ERROR_REPORTING__ENABLED:-false}
+    volumes:
+      - authentik_media:/media
+      - authentik_templates:/templates
+    ports:
+      - "${AUTHENTIK_PORT_HTTP:-8080}:9000"
+      - "${AUTHENTIK_PORT_HTTPS:-8443}:9443"
     depends_on:
       {% if cookiecutter.shared_db == "y" %}
       postgres:
         condition: service_healthy
       {% else %}
-      postgres-zitadel:
+      postgres-authentik:
         condition: service_healthy
       {% endif %}
-    ports:
-      - "8080:8080"
+
+  authentik-worker:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2026.2.2}
+    restart: unless-stopped
+    command: worker
+    environment:
+      {% if cookiecutter.shared_db == "y" %}
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER:-postgres}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      {% else %}
+      AUTHENTIK_POSTGRESQL__HOST: postgres-authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_POSTGRES_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_POSTGRES_PASSWORD}
+      {% endif %}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: ${AUTHENTIK_ERROR_REPORTING__ENABLED:-false}
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - authentik_media:/media
+      - authentik_certs:/certs
+      - authentik_templates:/templates
+    depends_on:
+      {% if cookiecutter.shared_db == "y" %}
+      postgres:
+        condition: service_healthy
+      {% else %}
+      postgres-authentik:
+        condition: service_healthy
+      {% endif %}
 
   {% if cookiecutter.add_arq == "y" %}
   redis:
@@ -104,8 +145,9 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      ZITADEL_DOMAIN: http://localhost:8080
-      ZITADEL_CLIENT_ID: ${ZITADEL_CLIENT_ID:-}
+      AUTHENTIK_ISSUER: http://authentik-server:9000
+      AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
+      AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
     volumes:
       - ./backend:/app
     ports:
@@ -130,7 +172,8 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      ZITADEL_DOMAIN: http://localhost:8080
+      AUTHENTIK_ISSUER: http://authentik-server:9000
+      AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
     volumes:
       - ./backend:/app
     depends_on:
@@ -152,16 +195,19 @@ services:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8000
-      VITE_ZITADEL_DOMAIN: http://localhost:8080
-      VITE_ZITADEL_CLIENT_ID: ${ZITADEL_CLIENT_ID:-}
+      VITE_AUTHENTIK_ISSUER: http://localhost:8080
+      VITE_AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
   {% endif %}
 
 volumes:
   postgres_data:
   {% if cookiecutter.shared_db == "n" %}
-  postgres_zitadel_data:
+  postgres_authentik_data:
   {% endif %}
   {% if cookiecutter.add_arq == "y" %}
   redis_data:
   {% endif %}
   minio_data:
+  authentik_media:
+  authentik_templates:
+  authentik_certs:

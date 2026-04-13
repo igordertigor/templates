@@ -1,5 +1,5 @@
 """
-Zitadel OIDC / JWT validation.
+Authentik OIDC / JWT validation.
 
 FastAPI dependency `get_current_user` validates the Bearer token on every
 request and returns the decoded claims. Use it in routers like:
@@ -27,7 +27,7 @@ async def _get_jwks() -> dict:
     if _jwks_cache is None:
         async with httpx.AsyncClient() as client:
             resp = await client.get(
-                f"{settings.zitadel_domain}/.well-known/openid-configuration"
+                f"{settings.authentik_issuer}/application/o/{settings.authentik_app_slug}/.well-known/openid-configuration"
             )
             resp.raise_for_status()
             oidc_config = resp.json()
@@ -58,8 +58,8 @@ async def get_current_user(
             token,
             jwks,
             algorithms=["RS256"],
-            audience=settings.zitadel_client_id or None,
-            options={"verify_aud": bool(settings.zitadel_client_id)},
+            audience=settings.authentik_client_id or None,
+            options={"verify_aud": bool(settings.authentik_client_id)},
         )
         return Claims(
             sub=payload["sub"],

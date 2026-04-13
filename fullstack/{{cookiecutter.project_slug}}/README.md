@@ -16,7 +16,7 @@
 {% if cookiecutter.add_arq == "y" %}
 | Background tasks | arq + Redis |
 {% endif %}
-| Auth | Zitadel (OIDC) |
+| Auth | Authentik (OIDC) |
 | Storage | MinIO |
 | Database | PostgreSQL |
 {% if cookiecutter.add_frontend == "y" %}
@@ -44,12 +44,12 @@ cp .env.example .env
 Edit `.env` and fill in all required values. At minimum:
 
 - `POSTGRES_PASSWORD` — any strong password for local dev
-- `ZITADEL_MASTERKEY` — exactly 32 characters, generate with:
+- `AUTHENTIK_SECRET_KEY` — generate with:
   ```bash
-  openssl rand -base64 32 | head -c 32
+  openssl rand -base64 60 | tr -d '\n'
   ```
 {% if cookiecutter.shared_db == "n" %}
-- `ZITADEL_POSTGRES_PASSWORD` — password for the Zitadel Postgres instance
+- `AUTHENTIK_POSTGRES_PASSWORD` — password for the Authentik Postgres instance
 {% endif %}
 - `MINIO_ROOT_PASSWORD` — any password for local dev
 
@@ -59,45 +59,71 @@ Edit `.env` and fill in all required values. At minimum:
 just up
 ```
 
-This starts PostgreSQL, Zitadel, MinIO{% if cookiecutter.add_arq == "y" %}, and Redis{% endif %} via Docker Compose.
+This starts PostgreSQL, Authentik, MinIO{% if cookiecutter.add_arq == "y" %}, and Redis{% endif %} via Docker Compose.
 
-### 4. Set up Zitadel
+{% if cookiecutter.shared_db == "y" %}
+**Important:** If you see "database authentik does not exist" errors, it means the PostgreSQL volume already exists from a previous run. The init script only runs on **first volume creation**. Solutions:
 
-Zitadel requires a one-time configuration via its admin UI. Visit http://localhost:8080 after `just up` completes.
+**Option 1: Start fresh (if no important data):**
+```bash
+docker compose down -v  # Deletes all volumes
+just up
+```
 
-#### Create a project
-
-1. Log in with the initial admin credentials printed in the Zitadel container logs:
-   ```bash
-   docker compose logs zitadel | grep -i "initial"
-   ```
-2. Navigate to **Projects** → **New Project**
-3. Name it `{{ cookiecutter.project_name }}`
-
-#### Create applications
-
-{% if cookiecutter.auth_user_pkce == "y" %}
-**Web application (PKCE — for the frontend):**
-1. Inside your project, click **New Application**
-2. Name: `frontend`, Type: **Web**, Auth method: **PKCE**
-3. Redirect URI: `http://localhost:5173/auth/callback`
-4. Post-logout redirect URI: `http://localhost:5173`
-5. Copy the **Client ID** and add it to `.env` as `ZITADEL_CLIENT_ID`
+**Option 2: Manually create the database:**
+```bash
+docker compose exec postgres psql -U postgres -c "CREATE DATABASE authentik;"
+docker compose restart authentik-server authentik-worker
+```
 {% endif %}
 
+### 4. Set up Authentik
+
+Authentik requires a one-time configuration via its admin UI.
+
+#### Initial setup
+
+1. Visit http://localhost:8080/if/flow/initial-setup/ (note the trailing slash!)
+2. Set a password for the default **akadmin** user
+3. Log in at http://localhost:8080 with username `akadmin` and your password
+
+#### Create an Application and Provider
+
+1. Navigate to **Applications** → **Applications** → **Create**
+2. Name: `{{ cookiecutter.project_name }}`
+3. Slug: `{{ cookiecutter.project_slug }}` (this will be your `AUTHENTIK_APP_SLUG`)
+4. Provider: **Create a new provider**
+5. Choose **OAuth2/OpenID Provider**
+6. Configure the provider:
+   - **Name**: `{{ cookiecutter.project_name }} Provider`
+   - **Authorization flow**: default-provider-authorization-implicit-consent
+   - **Client type**: Confidential
+   - **Client ID**: (auto-generated) — copy this to `.env` as `AUTHENTIK_CLIENT_ID`
+   - **Client Secret**: (auto-generated) — save this securely
+   - **Redirect URIs**: Add the following (one per line):
+     ```
+     http://localhost:5173/auth/callback
+     http://localhost:8000/docs/oauth2-redirect
+     ```
+   - **Signing Key**: authentik Self-signed Certificate
+7. Save the provider and application
+8. Update your `.env` file:
+   ```bash
+   AUTHENTIK_APP_SLUG={{ cookiecutter.project_slug }}
+   AUTHENTIK_CLIENT_ID=<client-id-from-authentik>
+   ```
+
 {% if cookiecutter.auth_client_credentials == "y" %}
-**API application (client credentials — for machine-to-machine):**
-1. Inside your project, click **New Application**
-2. Name: `backend-service`, Type: **API**, Auth method: **Private Key JWT** or **Basic**
-3. Copy the **Client ID** and **Client Secret** — store them securely
+#### For machine-to-machine (client credentials):
+1. Create a **Service Account** user in Authentik
+2. Create a separate Application with **Client Credentials** flow
+3. Assign appropriate permissions/groups to the service account
 {% endif %}
 
 {% if cookiecutter.auth_device_flow == "y" %}
-**Device flow application:**
-1. Inside your project, click **New Application**
-2. Name: `cli`, Type: **Native**
-3. Enable **Device Authorization** grant type
-4. Copy the **Client ID** and set it in your CLI configuration
+#### For device flow:
+1. In your provider configuration, ensure **Device Code Flow** is enabled
+2. The device authorization endpoint will be: `http://localhost:8080/application/o/{{ cookiecutter.project_slug }}/device/`
 {% endif %}
 
 #### Production / stage environments
@@ -106,7 +132,7 @@ Repeat the application setup for each environment with the correct redirect URIs
 - Stage: `https://your-stage-domain/auth/callback`
 - Prod: `https://your-prod-domain/auth/callback`
 
-Zitadel should have its `ZITADEL_EXTERNALDOMAIN` set correctly per environment — this is handled by the Kustomize overlays in `k8s/overlays/`.
+Update the Kubernetes ConfigMaps and Secrets in `k8s/overlays/` with the environment-specific values.
 
 ### 5. Run database migrations
 
@@ -137,8 +163,44 @@ just dev
 {% if cookiecutter.add_frontend == "y" %}
 - Frontend: http://localhost:5173
 {% endif %}
-- Zitadel: http://localhost:8080
+- Authentik: http://localhost:8080
 - MinIO console: http://localhost:9001
+
+---
+
+## Troubleshooting
+
+### Authentik: "database authentik does not exist"
+
+{% if cookiecutter.shared_db == "y" %}
+If you see this error when starting Authentik, it means the `authentik` database wasn't created in the shared PostgreSQL instance. This can happen if you had an existing PostgreSQL volume before switching to Authentik.
+
+**Solution: Manually create the database**
+```bash
+docker compose exec postgres psql -U postgres -c "CREATE DATABASE authentik;"
+docker compose restart authentik-server authentik-worker
+```
+
+Alternatively, if you don't have important data yet:
+```bash
+docker compose down -v  # WARNING: Deletes all volumes!
+docker compose up -d
+```
+{% endif %}
+
+### Port conflicts
+
+If you see "address already in use" errors:
+- Authentik uses ports **8080** (HTTP) and **8443** (HTTPS)
+- MinIO uses ports **9000** (API) and **9001** (Console)
+- Backend uses port **8000**
+- Frontend uses port **5173**
+- PostgreSQL uses port **5432**
+
+Check what's using a port:
+```bash
+lsof -i :8080  # Replace with the conflicting port
+```
 
 ---
 
