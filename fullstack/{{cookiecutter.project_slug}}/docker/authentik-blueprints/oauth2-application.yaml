@@ -1,0 +1,59 @@
+version: 1
+metadata:
+  name: {{ cookiecutter.project_name }} OAuth2 Application
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+
+context:
+  app_name: {{ cookiecutter.project_name }}
+  app_slug: {{ cookiecutter.project_slug }}
+  # These will be overridden by environment-specific values
+  redirect_uris_dev:
+    - http://localhost:5173/auth/callback
+    - http://localhost:8000/docs/oauth2-redirect
+
+entries:
+  # OAuth2/OIDC Provider
+  - model: authentik_providers_oauth2.oauth2provider
+    identifiers:
+      name: !Format ["%s Provider", !Context app_name]
+    id: provider
+    attrs:
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      client_type: confidential
+      client_id: !Env AUTHENTIK_CLIENT_ID
+      redirect_uris: !Format ["%s", !Context redirect_uris_dev]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+      access_code_validity: minutes=1
+      access_token_validity: minutes=5
+      refresh_token_validity: days=30
+
+  # Application
+  - model: authentik_core.application
+    identifiers:
+      slug: !Context app_slug
+    attrs:
+      name: !Context app_name
+      provider: !KeyOf provider
+      policy_engine_mode: any
+      open_in_new_tab: true
+
+{% if cookiecutter.auth_device_flow == "y" %}
+  # Note: Device flow is enabled by default in authentik OAuth2 providers
+  # Device authorization endpoint: http://localhost:8080/application/o/{{ cookiecutter.project_slug }}/device/
+{% endif %}
+
+# Instructions:
+# 1. Copy this file to: docker/authentik-blueprints/oauth2-application.yaml
+# 2. Generate a Client ID and add to .env:
+#    AUTHENTIK_CLIENT_ID=$(openssl rand -hex 20)
+# 3. Mount this file in docker-compose.yml under authentik-server and authentik-worker:
+#    volumes:
+#      - ./docker/authentik-blueprints:/blueprints/custom:ro
+# 4. Restart Authentik:
+#    docker compose restart authentik-server authentik-worker
+# 5. The blueprint will auto-apply and create the application
+# 6. Retrieve the client secret from the Authentik admin UI:
+#    Applications → Providers → {{ cookiecutter.project_name }} Provider → Client Secret
