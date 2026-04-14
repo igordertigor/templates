@@ -15,8 +15,10 @@ entries:
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-invalidation-flow]]
       client_type: confidential
       redirect_uris:
-        - http://localhost:5173/auth/callback
-        - http://localhost:8000/docs/oauth2-redirect
+        - matching_mode: strict
+          url: http://localhost:5173/auth/callback
+        - matching_mode: strict
+          url: http://localhost:8000/docs/oauth2-redirect
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
       sub_mode: hashed_user_id
       issuer_mode: per_provider
