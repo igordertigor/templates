@@ -13,7 +13,7 @@ entries:
     attrs:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-invalidation-flow]]
-      client_type: confidential
+      client_type: public
       client_id: !Env AUTHENTIK_CLIENT_ID
       redirect_uris:
         - matching_mode: strict
