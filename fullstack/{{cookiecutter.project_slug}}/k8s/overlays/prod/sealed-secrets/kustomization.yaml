@@ -3,6 +3,6 @@ kind: Kustomization
 resources: []
 # Add sealed secret files here once generated, e.g.:
 #   - postgres-secret.yaml
-#   - zitadel-secret.yaml
+#   - authentik-secret.yaml
 #   - minio-secret.yaml
 #   - backend-secret.yaml

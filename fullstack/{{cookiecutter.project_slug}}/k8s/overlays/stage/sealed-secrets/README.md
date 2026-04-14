@@ -13,9 +13,9 @@
 #
 # Required secrets:
 #   - postgres-secret        (keys: username, password)
-#   - zitadel-secret         (keys: masterkey)
+#   - authentik-secret       (keys: secret-key)
 #   - minio-secret           (keys: access-key, secret-key)
-#   - backend-secret         (keys: database-url, zitadel-client-id)
+#   - backend-secret         (keys: database-url, authentik-client-id)
 #
 # Stage secrets can use weaker passwords for convenience, but should still
 # be kept out of plain-text Git commits.

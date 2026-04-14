@@ -20,12 +20,12 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zitadel
+  name: authentik-server
 spec:
   template:
     spec:
       containers:
-        - name: zitadel
+        - name: authentik-server
           resources:
             requests:
               memory: "128Mi"

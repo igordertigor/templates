@@ -10,7 +10,6 @@ resources:
 
 patches:
   - path: patches/backend-config.yaml
-  - path: patches/zitadel-domain.yaml
 
 images:
   - name: {{ cookiecutter.project_slug }}-backend

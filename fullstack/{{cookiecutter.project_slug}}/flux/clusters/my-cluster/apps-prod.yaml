@@ -32,7 +32,7 @@ spec:
       namespace: {{ cookiecutter.project_slug }}-prod
     - apiVersion: apps/v1
       kind: Deployment
-      name: zitadel
+      name: authentik-server
       namespace: {{ cookiecutter.project_slug }}-prod
     {% if cookiecutter.add_arq == "y" %}
     - apiVersion: apps/v1

@@ -76,10 +76,10 @@ async def require_service_account(
 ) -> Claims:
     """
     Dependency for endpoints that should only be called by service accounts
-    (client credentials flow). Adjust the check to match your Zitadel roles
+    (client credentials flow). Adjust the check to match your Authentik roles
     or client ID conventions.
     """
-    # Example: check for a custom claim set in Zitadel actions
+    # Example: check for a custom claim set in Authentik policies/expressions
     # if "service_account" not in claims.roles:
     #     raise HTTPException(status_code=403, detail="Service accounts only")
     return claims

@@ -11,9 +11,9 @@
 #
 # Required secrets:
 #   - postgres-secret        (keys: username, password)
-#   - zitadel-secret         (keys: masterkey)
+#   - authentik-secret       (keys: secret-key)
 #   - minio-secret           (keys: access-key, secret-key)
-#   - backend-secret         (keys: database-url, zitadel-client-id)
+#   - backend-secret         (keys: database-url, authentik-client-id)
 #
 # After sealing, add each file to the kustomization.yaml resources list.
 #

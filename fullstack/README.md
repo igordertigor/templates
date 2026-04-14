@@ -19,7 +19,7 @@ The tradeoff is that you write a little more boilerplate upfront. The payoff is 
 | Migrations | Alembic | Standard, reliable |
 | GraphQL (optional) | Strawberry | Type-safe, integrates with FastAPI cleanly |
 | Background tasks (optional) | arq | Async, Redis-backed, fits naturally with FastAPI |
-| Auth | Zitadel | Self-hostable, OIDC/OAuth2, K8s-native |
+| Auth | Authentik | Self-hostable, OIDC/OAuth2, flexible flows |
 | Storage | MinIO | S3-compatible, self-hostable |
 | Database | PostgreSQL | |
 | Frontend (optional) | React + Vite + React Router v7 + Apollo Client + Mantine | |
@@ -67,7 +67,7 @@ cookiecutter path/to/cookiecutter-fastapi-stack
 | `add_frontend` | `y` | Include React + Vite + Mantine frontend |
 | `add_strawberry` | `y` | Include Strawberry GraphQL endpoint |
 | `add_arq` | `y` | Include arq worker + Redis |
-| `shared_db` | `n` | Zitadel shares app Postgres instance (separate DB) vs own instance |
+| `shared_db` | `n` | Authentik shares app Postgres instance (separate DB) vs own instance |
 | `use_stage_namespace` | `y` | Add stage overlay + Flux Kustomization alongside prod |
 | `auth_user_pkce` | `y` | PKCE flow for browser-based user login |
 | `auth_device_flow` | `n` | Device flow for CLI tools / browserless devices |
@@ -116,7 +116,7 @@ my-project/
 │   │   ├── router.tsx
 │   │   ├── apollo.ts
 │   │   ├── auth/
-│   │   │   └── oidc.ts       # oidc-client-ts, Zitadel PKCE config
+│   │   │   └── oidc.ts       # oidc-client-ts, Authentik PKCE config
 │   │   ├── pages/
 │   │   ├── components/
 │   │   └── graphql/
@@ -131,7 +131,7 @@ my-project/
 │   │   ├── postgres/
 │   │   ├── redis/            # (if arq enabled)
 │   │   ├── minio/
-│   │   ├── zitadel/
+│   │   ├── authentik/
 │   │   ├── backend/
 │   │   ├── worker/           # (if arq enabled)
 │   │   └── frontend/         # (if frontend enabled)
@@ -193,21 +193,21 @@ Always review auto-generated migrations before applying — Alembic's autogenera
 
 ## Authentication
 
-This template uses [Zitadel](https://zitadel.com/) as the identity provider. Zitadel is self-hostable, OIDC-compliant, and supports all common OAuth2 flows. It runs as a separate service alongside your application.
+This template uses [Authentik](https://goauthentik.io/) as the identity provider. Authentik is self-hostable, OIDC-compliant, and supports all common OAuth2 flows. It runs as a separate service alongside your application.
 
 ### Flows
 
-**PKCE (browser login)** — Used by the React frontend. The user is redirected to Zitadel, authenticates, and is redirected back with a code that is exchanged for a JWT. The JWT is validated by FastAPI on every request.
+**PKCE (browser login)** — Used by the React frontend. The user is redirected to Authentik, authenticates, and is redirected back with a code that is exchanged for a JWT. The JWT is validated by FastAPI on every request.
 
 **Device flow** — Used by CLI tools or devices without a browser. The device displays a short code and a URL; the user visits the URL on any device and approves the login. Useful if you ship a CLI alongside your application.
 
 **Client credentials** — Used for machine-to-machine communication. A service authenticates with a client ID and secret and receives a JWT. No user is involved. Useful for background services, data pipelines, or external integrations.
 
-All flows produce a JWT that FastAPI validates using Zitadel's JWKS endpoint. The validation logic is in `app/auth/oidc.py` and exposed as a FastAPI dependency.
+All flows produce a JWT that FastAPI validates using Authentik's JWKS endpoint. The validation logic is in `app/auth/oidc.py` and exposed as a FastAPI dependency.
 
-### Zitadel setup
+### Authentik setup
 
-Zitadel requires some initial configuration (creating a project, applications, and redirect URIs) that cannot easily be scripted. The README in the generated project contains step-by-step instructions for the Zitadel admin UI, including:
+Authentik configuration is automated via blueprints for local development. The README in the generated project contains step-by-step instructions for the Authentik admin UI, including:
 
 - Creating a project for your application
 - Creating a web application (PKCE) for the frontend
@@ -227,7 +227,7 @@ my-project-prod     ← production namespace
 my-project-stage    ← staging namespace
 ```
 
-Both namespaces run independent copies of all services with their own databases and configuration. Zitadel is configured with separate applications and redirect URIs per environment.
+Both namespaces run independent copies of all services with their own databases and configuration. Authentik is configured with separate applications and redirect URIs per environment.
 
 ### Flux bootstrap (one-time per cluster)
 

@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - postgres
   - minio
-  - zitadel
+  - authentik
   - backend
   {% if cookiecutter.add_arq == "y" %}
   - redis

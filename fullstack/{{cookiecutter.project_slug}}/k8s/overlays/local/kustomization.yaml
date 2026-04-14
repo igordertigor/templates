@@ -10,7 +10,6 @@ resources:
 
 patches:
   - path: patches/backend-config.yaml
-  - path: patches/zitadel-domain.yaml
   - path: patches/resources.yaml   # Reduce resource requests for local
 
 images:

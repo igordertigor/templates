@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: backend-config
 data:
-  zitadel-domain: "https://auth.{{ cookiecutter.project_slug }}.example.com"
+  authentik-issuer: "https://auth.{{ cookiecutter.project_slug }}.example.com/application/o/{{ cookiecutter.project_slug }}/"

@@ -10,7 +10,7 @@ class CRUDUser(CRUDBase[User]):
         return await session.exec(select(User).where(User.email == email)).first()
 
     async def get_by_sub(self, session: AsyncSession, sub: str) -> User | None:
-        """Look up a user by their Zitadel subject claim."""
+        """Look up a user by their Authentik subject claim."""
         return await session.exec(select(User).where(User.sub == sub)).first()
 
     async def get_or_create(self, session: AsyncSession, *, sub: str, email: str) -> User:

@@ -21,16 +21,16 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: database-url
-            - name: ZITADEL_DOMAIN
+            - name: AUTHENTIK_ISSUER
               valueFrom:
                 configMapKeyRef:
                   name: backend-config
-                  key: zitadel-domain
-            - name: ZITADEL_CLIENT_ID
+                  key: authentik-issuer
+            - name: AUTHENTIK_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: backend-secret
-                  key: zitadel-client-id
+                  key: authentik-client-id
             - name: MINIO_ENDPOINT
               value: minio:9000
             - name: MINIO_ACCESS_KEY
@@ -73,4 +73,4 @@ metadata:
   name: backend-config
 data:
   # Patched per overlay
-  zitadel-domain: "https://auth.example.com"
+  authentik-issuer: "https://auth.example.com/application/o/{{ cookiecutter.project_slug }}/"

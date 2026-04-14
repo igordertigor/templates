@@ -7,7 +7,7 @@ const httpLink = createHttpLink({
   uri: "/graphql",
 });
 
-// Attach the access token from Zitadel to every GraphQL request
+// Attach the access token from Authentik to every GraphQL request
 const authLink = setContext(async (_, { headers }) => {
   const user = await userManager.getUser();
   return {
