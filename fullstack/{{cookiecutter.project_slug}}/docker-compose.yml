@@ -54,6 +54,8 @@ services:
       {% endif %}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?required}
       AUTHENTIK_ERROR_REPORTING__ENABLED: ${AUTHENTIK_ERROR_REPORTING__ENABLED:-false}
+      # Blueprint variables
+      AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
     volumes:
       - authentik_media:/media
       - authentik_templates:/templates
@@ -88,6 +90,8 @@ services:
       {% endif %}
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
       AUTHENTIK_ERROR_REPORTING__ENABLED: ${AUTHENTIK_ERROR_REPORTING__ENABLED:-false}
+      # Blueprint variables
+      AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
