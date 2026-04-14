@@ -12,9 +12,6 @@ dist/
 .pytest_cache/
 .ruff_cache/
 
-# uv
-uv.lock
-
 # Node
 node_modules/
 dist/
