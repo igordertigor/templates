@@ -151,7 +151,7 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      AUTHENTIK_ISSUER: http://authentik-server:9000
+      AUTHENTIK_ISSUER: http://authentik-server:9000/application/o/{{ cookiecutter.project_slug }}/
       AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
       AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
     develop:
@@ -193,7 +193,7 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      AUTHENTIK_ISSUER: http://authentik-server:9000
+      AUTHENTIK_ISSUER: http://authentik-server:9000/application/o/{{ cookiecutter.project_slug }}/
       AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
     develop:
       watch:
@@ -256,7 +256,7 @@ services:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8000
-      VITE_AUTHENTIK_ISSUER: http://localhost:8080
+      VITE_AUTHENTIK_ISSUER: http://localhost:8080/application/o/{{ cookiecutter.project_slug }}/
       VITE_AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
   {% endif %}
 
