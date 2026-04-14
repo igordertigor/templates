@@ -52,10 +52,11 @@ Edit `.env` and fill in all required values. At minimum:
 - `AUTHENTIK_POSTGRES_PASSWORD` — password for the Authentik Postgres instance
 {% endif %}
 - `MINIO_ROOT_PASSWORD` — any password for local dev
-- `AUTHENTIK_CLIENT_ID` — generate with:
+- `AUTHENTIK_CLIENT_ID` — **CRITICAL**: This must be set before starting Authentik. Generate with:
   ```bash
   openssl rand -hex 20
   ```
+  This is used by the Authentik blueprint to configure the OAuth2 provider's Client ID.
 
 ### 3. Start backing services
 
@@ -65,7 +66,7 @@ just up
 
 This starts PostgreSQL, Authentik, MinIO{% if cookiecutter.add_arq == "y" %}, and Redis{% endif %} via Docker Compose.
 
-**Note:** The `AUTHENTIK_CLIENT_ID` must be set in `.env` before starting, as the Authentik blueprint uses it to configure the OAuth2 provider.
+**IMPORTANT:** The `AUTHENTIK_CLIENT_ID` must be set in `.env` before starting Authentik. The blueprint uses it to configure the OAuth2 provider's Client ID. If this value is missing or empty, the blueprint will fail to apply and you'll see a "Client ID Error" when trying to authenticate.
 
 {% if cookiecutter.shared_db == "y" %}
 **Important:** If you see "database authentik does not exist" errors, it means the PostgreSQL volume already exists from a previous run. The init script only runs on **first volume creation**. Solutions:
@@ -431,17 +432,55 @@ docker compose up -d
 
 If the OAuth2 application isn't created automatically:
 
-1. Check that `AUTHENTIK_CLIENT_ID` is set in your `.env` file
-2. Check the Authentik worker logs:
+1. **Check that `AUTHENTIK_CLIENT_ID` is set in your `.env` file:**
+   ```bash
+   grep AUTHENTIK_CLIENT_ID .env
+   ```
+   If empty, generate one:
+   ```bash
+   echo "AUTHENTIK_CLIENT_ID=$(openssl rand -hex 20)" >> .env
+   ```
+2. Check the Authentik worker logs for blueprint errors:
    ```bash
    docker compose logs authentik-worker | grep blueprint
    ```
-3. Manually trigger blueprint discovery:
+   Common error: "Failed to apply blueprint: 'AUTHENTIK_CLIENT_ID' is not defined"
+3. Restart Authentik to apply the blueprint with the corrected environment:
    ```bash
    docker compose restart authentik-server authentik-worker
    ```
 
 For more details, see `docker/authentik-blueprints/README.md`.
+
+### Authentik: "Client ID Error - The client identifier (client_id) is missing or invalid"
+
+This error occurs when the OAuth2 provider doesn't have a valid Client ID configured. This typically happens when:
+
+1. `AUTHENTIK_CLIENT_ID` was not set in `.env` before starting Authentik
+2. The blueprint failed to apply due to the missing environment variable
+
+**Solution:**
+1. Stop Authentik:
+   ```bash
+   docker compose down
+   ```
+2. Ensure `AUTHENTIK_CLIENT_ID` is set in your `.env`:
+   ```bash
+   grep AUTHENTIK_CLIENT_ID .env
+   ```
+   If missing or empty, generate one:
+   ```bash
+   echo "AUTHENTIK_CLIENT_ID=$(openssl rand -hex 20)" >> .env
+   ```
+3. Start Authentik again:
+   ```bash
+   docker compose up -d authentik-server authentik-worker
+   ```
+4. Verify the blueprint applied successfully:
+   ```bash
+   docker compose logs authentik-worker | grep -i blueprint
+   ```
+   You should see: "Successfully applied blueprint"
 
 ### Authentik client secret not working
 
