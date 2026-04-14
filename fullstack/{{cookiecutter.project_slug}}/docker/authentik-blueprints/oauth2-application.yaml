@@ -12,11 +12,11 @@ entries:
     id: provider
     attrs:
       authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-invalidation-flow]]
       client_type: confidential
-      client_id: !Env AUTHENTIK_CLIENT_ID
-      redirect_uris: |
-        http://localhost:5173/auth/callback
-        http://localhost:8000/docs/oauth2-redirect
+      redirect_uris:
+        - http://localhost:5173/auth/callback
+        - http://localhost:8000/docs/oauth2-redirect
       signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
       sub_mode: hashed_user_id
       issuer_mode: per_provider
