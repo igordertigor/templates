@@ -8,10 +8,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint src",
     {% if cookiecutter.add_strawberry == "y" %}
-    "codegen": "graphql-codegen"
+    "codegen": "graphql-codegen",
     {% endif %}
+    "lint": "eslint src"
   },
   "dependencies": {
     "@apollo/client": "^3.12",
