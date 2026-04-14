@@ -1,0 +1,3 @@
+# Authentik external domain configuration for production environment
+# This file is kept for future use if you need to configure ingress or external URLs
+# For now, Authentik uses the Kubernetes service DNS internally

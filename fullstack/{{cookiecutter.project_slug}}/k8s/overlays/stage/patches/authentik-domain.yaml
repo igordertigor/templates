@@ -1,0 +1,5 @@
+{% if cookiecutter.use_stage_namespace == "y" %}
+# Authentik external domain configuration for stage environment
+# This file is kept for future use if you need to configure ingress or external URLs
+# For now, Authentik uses the Kubernetes service DNS internally
+{% endif %}

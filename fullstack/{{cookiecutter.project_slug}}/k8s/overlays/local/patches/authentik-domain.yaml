@@ -1,0 +1,3 @@
+# For local development, Authentik doesn't need external domain configuration
+# This file is kept for consistency with prod/stage overlays but can be empty
+# Authentik will use the Kubernetes service DNS name internally
