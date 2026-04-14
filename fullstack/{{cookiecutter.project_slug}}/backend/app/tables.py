@@ -17,8 +17,7 @@ from .utils.utcnow import utcnow
 class User(SQLModel, AsyncAttrs, table=True):
     __tablename__ = "users"
 
-    # TODO: Should this be required? Does it need a default_factory
-    id: uuid.UUID | None = Field(default=None, primary_key=True)
+    id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
     sub: str = Field(unique=True, index=True)  # Authentik subject claim
     email: str = Field(unique=True, index=True)
     created_at: datetime = Field(default_factory=utcnow)
