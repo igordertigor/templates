@@ -6,7 +6,6 @@ class Settings(BaseSettings):
 
     database_url: str
     authentik_issuer: str
-    authentik_app_slug: str = ""
     authentik_client_id: str = ""
 
     {% if cookiecutter.add_arq == "y" %}

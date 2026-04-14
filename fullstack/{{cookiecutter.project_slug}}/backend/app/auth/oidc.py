@@ -27,7 +27,7 @@ async def _get_jwks() -> dict:
     if _jwks_cache is None:
         async with httpx.AsyncClient() as client:
             resp = await client.get(
-                f"{settings.authentik_issuer}/application/o/{settings.authentik_app_slug}/.well-known/openid-configuration"
+                f"{settings.authentik_issuer}.well-known/openid-configuration"
             )
             resp.raise_for_status()
             oidc_config = resp.json()

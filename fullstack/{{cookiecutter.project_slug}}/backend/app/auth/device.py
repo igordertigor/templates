@@ -42,13 +42,12 @@ class DeviceFlowClient:
     def __init__(self, client_id: str | None = None) -> None:
         self.client_id = client_id or settings.authentik_client_id
         self.base_url = settings.authentik_issuer
-        self.app_slug = settings.authentik_app_slug
 
     async def start(self, scopes: list[str] | None = None) -> DeviceAuthResponse:
         scopes = scopes or ["openid", "email", "profile", "offline_access"]
         async with httpx.AsyncClient() as client:
             resp = await client.post(
-                f"{self.base_url}/application/o/{self.app_slug}/device/",
+                f"{self.base_url}device/",
                 data={
                     "client_id": self.client_id,
                     "scope": " ".join(scopes),
@@ -66,7 +65,7 @@ class DeviceFlowClient:
                 await asyncio.sleep(interval)
                 elapsed += interval
                 resp = await client.post(
-                    f"{self.base_url}/application/o/token/",
+                    f"{self.base_url}token/",
                     data={
                         "client_id": self.client_id,
                         "grant_type": "urn:ietf:params:oauth:grant-type:device_code",

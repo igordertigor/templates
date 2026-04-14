@@ -152,7 +152,6 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       AUTHENTIK_ISSUER: http://authentik-server:9000/application/o/{{ cookiecutter.project_slug }}/
-      AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
       AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
     develop:
       watch:
@@ -194,7 +193,6 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       AUTHENTIK_ISSUER: http://authentik-server:9000/application/o/{{ cookiecutter.project_slug }}/
-      AUTHENTIK_APP_SLUG: ${AUTHENTIK_APP_SLUG:-}
     develop:
       watch:
         - action: sync

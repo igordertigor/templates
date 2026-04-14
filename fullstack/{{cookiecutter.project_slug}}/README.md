@@ -339,7 +339,6 @@ If you prefer to set up Authentik manually or need to customize beyond the bluep
 
 3. **Save and Update .env:**
    ```bash
-   AUTHENTIK_APP_SLUG={{ cookiecutter.project_slug }}
    AUTHENTIK_CLIENT_ID=<client-id-from-authentik>
    ```
 
