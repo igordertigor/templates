@@ -24,7 +24,7 @@ class Query:
         claims = await get_current_user(credentials)
 
         session = info.context["session"]
-        user = users_crud.get_by_sub(session, claims.sub)
+        user = await users_crud.get_by_sub(session, claims.sub)
         if not user:
             return None
         return UserType(id=user.id, email=user.email, created_at=user.created_at)
