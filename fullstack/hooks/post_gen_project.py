@@ -69,6 +69,12 @@ if not ADD_STRAWBERRY:
         remove("frontend/codegen.ts")
         remove("frontend/tsconfig.node.json")  # codegen.ts is its only non-vite entry
         remove("frontend/src/graphql")
+        remove("frontend/src/apollo.ts")
+else:
+    # If Strawberry is enabled, remove TanStack Query files
+    if ADD_FRONTEND:
+        remove("frontend/src/query-client.ts")
+        remove("frontend/src/api")
 
 if not ADD_ARQ:
     remove("backend/app/worker")

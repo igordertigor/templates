@@ -22,7 +22,7 @@ The tradeoff is that you write a little more boilerplate upfront. The payoff is 
 | Auth | Authentik | Self-hostable, OIDC/OAuth2, flexible flows |
 | Storage | MinIO | S3-compatible, self-hostable |
 | Database | PostgreSQL | |
-| Frontend (optional) | React + Vite + React Router v7 + Apollo Client + Mantine | |
+| Frontend (optional) | React + Vite + React Router v7 + Mantine | Apollo Client (GraphQL) or TanStack Query (REST) |
 | JS package manager | pnpm | Faster, stricter than npm |
 | Python package manager | uv | Fast, modern, replaces pip + venv + pip-tools |
 | Task runner | just | Simple, language-agnostic Makefile replacement |
@@ -65,7 +65,7 @@ cookiecutter path/to/cookiecutter-fastapi-stack
 | `python_version` | `3.12` | Python version for uv + Dockerfile |
 | `postgres_version` | `16` | PostgreSQL version |
 | `add_frontend` | `y` | Include React + Vite + Mantine frontend |
-| `add_strawberry` | `y` | Include Strawberry GraphQL endpoint |
+| `add_strawberry` | `n` | Include Strawberry GraphQL endpoint (uses Apollo Client on frontend; if disabled, uses TanStack Query) |
 | `add_arq` | `y` | Include arq worker + Redis |
 | `shared_db` | `n` | Authentik shares app Postgres instance (separate DB) vs own instance |
 | `use_stage_namespace` | `y` | Add stage overlay + Flux Kustomization alongside prod |
@@ -114,15 +114,18 @@ my-project/
 │   ├── src/
 │   │   ├── main.tsx
 │   │   ├── router.tsx
-│   │   ├── apollo.ts
+│   │   ├── apollo.ts         # (if GraphQL enabled)
+│   │   ├── query-client.ts   # (if GraphQL disabled - TanStack Query)
 │   │   ├── auth/
 │   │   │   └── oidc.ts       # oidc-client-ts, Authentik PKCE config
 │   │   ├── pages/
 │   │   ├── components/
-│   │   └── graphql/
+│   │   ├── api/              # (if GraphQL disabled - REST API hooks)
+│   │   │   └── users.ts
+│   │   └── graphql/          # (if GraphQL enabled)
 │   │       ├── queries/
 │   │       └── mutations/
-│   ├── codegen.ts            # GraphQL Code Generator config
+│   ├── codegen.ts            # (if GraphQL enabled)
 │   ├── vite.config.ts
 │   ├── tsconfig.json
 │   └── package.json
@@ -268,9 +271,11 @@ kubectl create secret generic my-secret \
 
 ---
 
-## GraphQL Code Generator
+## Data Fetching
 
-If Strawberry is enabled, the frontend uses GraphQL Code Generator to produce TypeScript types and Apollo hooks from your schema. This means your Python types propagate automatically to the frontend.
+### GraphQL (if Strawberry enabled)
+
+When Strawberry is enabled, the frontend uses **Apollo Client** for GraphQL queries and **GraphQL Code Generator** to produce TypeScript types from your schema. This means your Python types propagate automatically to the frontend.
 
 ```bash
 # Regenerate types after changing the schema
@@ -278,6 +283,29 @@ just codegen
 ```
 
 Types are generated per query, not per model — a `GetUser` query and a `GetUserFull` query produce separate types reflecting exactly what each query returns. This is intentional: it keeps TypeScript honest about what data is actually available at each call site.
+
+### REST API (if Strawberry disabled)
+
+When Strawberry is disabled, the frontend uses **TanStack Query (React Query)** for data fetching, caching, and synchronization. The template includes:
+
+- `src/query-client.ts`: QueryClient configuration with authentication
+- `src/api/users.ts`: Example REST API hooks using `useQuery` and `useMutation`
+- `authenticatedFetch()`: Helper that automatically attaches Authentik tokens to requests
+
+Example usage:
+
+```tsx
+import { useCurrentUser, useUpdateUser } from "../api/users";
+
+function MyComponent() {
+  const { data: user, isLoading } = useCurrentUser();
+  const updateUser = useUpdateUser();
+  
+  // ... use the data
+}
+```
+
+TanStack Query provides automatic caching, background refetching, optimistic updates, and devtools for debugging. See the [TanStack Query docs](https://tanstack.com/query/latest) for more details.
 
 ---
 

@@ -1,4 +1,4 @@
-{% if cookiecutter.add_frontend == "y" %}
+{% if cookiecutter.add_frontend == "y" and cookiecutter.add_strawberry == "y" %}
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { userManager } from "./auth/oidc";
