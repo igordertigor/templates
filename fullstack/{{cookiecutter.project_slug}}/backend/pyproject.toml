@@ -36,5 +36,14 @@ target-version = "py{{ cookiecutter.python_version | replace('.', '') }}"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 
+[tool.ruff.lint.isort]
+section-order = ["future", "testing", "types", "standard-library", "third-party", "api", "science", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+testing = ["unittest", "pytest", "pytest_asyncio", "hypothesis"]
+types = ["typing", "typing_extensions", "abc"]
+api = ["fastapi"]
+science = ["numpy", "pandas", "scipy", "librosa", "torch", "soxr", "soundfile", "sklearn", "joblib"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
