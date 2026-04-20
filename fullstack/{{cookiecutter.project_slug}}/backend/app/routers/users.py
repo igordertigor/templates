@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -22,7 +24,7 @@ async def get_me(
 
 @router.get("/{user_id}", response_model=User)
 async def get_user(
-    user_id: int,
+    user_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
     _: Claims = Depends(get_current_user),
 ) -> User:

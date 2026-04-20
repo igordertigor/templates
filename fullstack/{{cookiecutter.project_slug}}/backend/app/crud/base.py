@@ -1,4 +1,5 @@
 from typing import Generic, TypeVar
+import uuid
 
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -10,7 +11,7 @@ class CRUDBase(Generic[TableType]):
     def __init__(self, model: type[TableType]) -> None:
         self.model = model
 
-    async def get(self, session: AsyncSession, id: int) -> TableType | None:
+    async def get(self, session: AsyncSession, id: uuid.UUID) -> TableType | None:
         return await session.get(self.model, id)
 
     async def get_multi(
@@ -32,7 +33,7 @@ class CRUDBase(Generic[TableType]):
         await session.refresh(db_obj)
         return db_obj
 
-    async def delete(self, session: AsyncSession, *, id: int) -> TableType | None:
+    async def delete(self, session: AsyncSession, *, id: uuid.UUID) -> TableType | None:
         obj = await session.get(self.model, id)
         if obj:
             await session.delete(obj)
